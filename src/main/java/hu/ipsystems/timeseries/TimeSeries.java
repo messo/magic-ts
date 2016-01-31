@@ -8,6 +8,9 @@ import java.time.temporal.TemporalUnit;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import static hu.ipsystems.timeseries.time.TemporalUtil.roundDown;
+import static hu.ipsystems.timeseries.time.TemporalUtil.roundUp;
+
 public class TimeSeries implements Iterable<Double> {
 
     // FIXME -- ???
@@ -103,26 +106,31 @@ public class TimeSeries implements Iterable<Double> {
     private class TimeSeriesIteratorWithShorterTemporalUnit implements Iterator<Double> {
 
         private final TimeSeriesIterator iterator;
-        private final int mod;
+        private final TemporalUnit newIterationUnit;
         private final int end;
 
+        private ZonedDateTime nextIterationAt;
         private int cursor;
+        private int turnPoint;
         private double lastRet;
 
         public TimeSeriesIteratorWithShorterTemporalUnit(ZonedDateTime start, ZonedDateTime finish, TemporalUnit newIterationUnit) {
             // FIXME -- REMOVE once it's fixed!
             Preconditions.checkArgument(unit == ChronoUnit.DAYS);
 
-            // FIXME -- these are working only for DAYS!
-            ZonedDateTime innerStart = start.truncatedTo(unit);
-            ZonedDateTime innerEnd = finish.truncatedTo(unit).plusDays(1);
+            ZonedDateTime innerStart = roundDown(start, unit);
+            ZonedDateTime innerEnd = roundUp(finish, unit);
             this.iterator = new TimeSeriesIterator(innerStart, innerEnd);
+            this.newIterationUnit = newIterationUnit;
 
-            this.cursor = (int) newIterationUnit.between(TimeSeries.this.begin, start);
-            this.mod = 24; // FIXME -- only four DAYS -> HOURS, 23-25 hours!
-            this.end = mod - (int) newIterationUnit.between(finish, innerEnd);
-
-            this.lastRet = iterator.next();
+            this.nextIterationAt = innerStart.plus(1, unit);
+            int _end = (int) newIterationUnit.between(finish.truncatedTo(unit), finish);
+            if (_end == 0) {
+                // recalculate
+                _end = (int) newIterationUnit.between(finish.minus(1, unit), finish);
+            }
+            this.end = _end;
+            this.turnPoint = (int) newIterationUnit.between(start, nextIterationAt);
         }
 
         @Override
@@ -132,12 +140,17 @@ public class TimeSeries implements Iterable<Double> {
 
         @Override
         public Double next() {
-            if (cursor >= mod) {
-                cursor = 1;
+            if (cursor == 0) {
                 lastRet = iterator.next();
-            } else {
-                ++cursor;
+            } else if (cursor >= turnPoint) {
+                cursor = 0;
+                ZonedDateTime currIterationAt = nextIterationAt;
+                nextIterationAt = nextIterationAt.plus(1, unit);
+                turnPoint = (int) newIterationUnit.between(currIterationAt, nextIterationAt);
+                lastRet = iterator.next();
             }
+
+            ++cursor;
 
             return lastRet;
         }
