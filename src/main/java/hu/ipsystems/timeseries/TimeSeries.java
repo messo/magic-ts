@@ -1,15 +1,13 @@
 package hu.ipsystems.timeseries;
 
-import com.google.common.base.Preconditions;
-
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import static hu.ipsystems.timeseries.time.TemporalUtil.roundDown;
-import static hu.ipsystems.timeseries.time.TemporalUtil.roundUp;
+import static hu.ipsystems.timeseries.time.Temporals.roundDown;
+import static hu.ipsystems.timeseries.time.Temporals.roundUp;
 
 public class TimeSeries implements Iterable<Double> {
 
@@ -30,17 +28,22 @@ public class TimeSeries implements Iterable<Double> {
     }
 
 
-    private int getIndex(ZonedDateTime time) {
-        return (int) unit.between(begin, time);
+    public ZonedDateTime getBegin() {
+        return begin;
     }
 
-    private double getData(int idx) {
-        return (idx >= 0 && idx < data.length) ? data[idx] : GAP;
+    public ZonedDateTime getEnd() {
+        return end;
+    }
+
+    public TemporalUnit getUnit() {
+        return unit;
     }
 
     public double[] getData() {
-        return data;
+        return Arrays.copyOf(data, data.length);
     }
+
 
     @Override
     public Iterator<Double> iterator() {
@@ -62,17 +65,15 @@ public class TimeSeries implements Iterable<Double> {
         }
     }
 
-    public ZonedDateTime getBegin() {
-        return begin;
+
+    private int getIndex(ZonedDateTime time) {
+        return (int) unit.between(begin, time);
     }
 
-    public ZonedDateTime getEnd() {
-        return end;
+    private double getData(int idx) {
+        return (idx >= 0 && idx < data.length) ? data[idx] : GAP;
     }
 
-    public TemporalUnit getUnit() {
-        return unit;
-    }
 
     private class TimeSeriesIterator implements Iterator<Double> {
 
@@ -103,50 +104,49 @@ public class TimeSeries implements Iterable<Double> {
         }
     }
 
+
     private class TimeSeriesIteratorWithShorterTemporalUnit implements Iterator<Double> {
 
         private final TimeSeriesIterator iterator;
         private final TemporalUnit newIterationUnit;
-        private final int end;
+        private final int lastIterationEnd;
 
         private ZonedDateTime nextIterationAt;
         private int cursor;
         private int turnPoint;
-        private double lastRet;
+        private Double lastRet;
 
         public TimeSeriesIteratorWithShorterTemporalUnit(ZonedDateTime start, ZonedDateTime finish, TemporalUnit newIterationUnit) {
-            // FIXME -- REMOVE once it's fixed!
-            Preconditions.checkArgument(unit == ChronoUnit.DAYS);
-
             ZonedDateTime innerStart = roundDown(start, unit);
             ZonedDateTime innerEnd = roundUp(finish, unit);
             this.iterator = new TimeSeriesIterator(innerStart, innerEnd);
             this.newIterationUnit = newIterationUnit;
 
             this.nextIterationAt = innerStart.plus(1, unit);
-            int _end = (int) newIterationUnit.between(finish.truncatedTo(unit), finish);
-            if (_end == 0) {
-                // recalculate
-                _end = (int) newIterationUnit.between(finish.minus(1, unit), finish);
+            this.cursor = (int) newIterationUnit.between(innerStart, start);
+            this.turnPoint = (int) newIterationUnit.between(innerStart, nextIterationAt);
+            int end = (int) newIterationUnit.between(roundDown(finish, unit), finish);
+            if (end == 0) {
+                // we need to finish at the very last item, without starting a new iteration
+                end = (int) newIterationUnit.between(finish.minus(1, unit), finish);
             }
-            this.end = _end;
-            this.turnPoint = (int) newIterationUnit.between(start, nextIterationAt);
+            this.lastIterationEnd = end;
         }
 
         @Override
         public boolean hasNext() {
-            return iterator.hasNext() || (cursor != end);
+            return iterator.hasNext() || (cursor != lastIterationEnd);
         }
 
         @Override
         public Double next() {
-            if (cursor == 0) {
+            if (lastRet == null) {
                 lastRet = iterator.next();
             } else if (cursor >= turnPoint) {
                 cursor = 0;
-                ZonedDateTime currIterationAt = nextIterationAt;
+                ZonedDateTime current = nextIterationAt;
                 nextIterationAt = nextIterationAt.plus(1, unit);
-                turnPoint = (int) newIterationUnit.between(currIterationAt, nextIterationAt);
+                turnPoint = (int) newIterationUnit.between(current, nextIterationAt);
                 lastRet = iterator.next();
             }
 
