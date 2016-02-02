@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,11 +60,14 @@ public class TimeSeriesIteratorTests {
 
         // then
         Assert.assertEquals(24, iteratedData.size());
-
-        double[] expected = new double[24];
-        Arrays.fill(expected, TimeSeries.GAP);
-        System.arraycopy(data, 0, expected, 10, data.length);
-        Assert.assertEquals(Doubles.asList(expected), iteratedData);
+        Assert.assertEquals(
+                generateDoubles(
+                        DoubleStream.generate(() -> TimeSeries.GAP).limit(10),
+                        DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0),
+                        DoubleStream.generate(() -> TimeSeries.GAP).limit(9)
+                ),
+                iteratedData
+        );
     }
 
     @Test
