@@ -34,12 +34,16 @@ public class TimeSeriesList {
         List<Iterator<Double>> iterators = new LinkedList<>();
         list.forEach(timeSeries -> iterators.add(timeSeries.iterator(from, to, shortestTemporalUnit)));
 
-        double[] data = doSum(iterators, (int) shortestTemporalUnit.between(from, to));
+        Double[] data = doSum(iterators, (int) shortestTemporalUnit.between(from, to));
         return new TimeSeries(from, shortestTemporalUnit, data);
     }
 
-    private double[] doSum(List<Iterator<Double>> iterators, int length) {
-        double[] data = new double[length];
+    private Double[] doSum(List<Iterator<Double>> iterators, int length) {
+        Double[] data = new Double[length];
+
+        for (int i = 0; i < length; i++) {
+            data[i] = 0.0;
+        }
 
         for (Iterator<Double> it : iterators) {
             for (int i = 0; i < length; i++) {

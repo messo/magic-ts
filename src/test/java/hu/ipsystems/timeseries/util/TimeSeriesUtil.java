@@ -31,7 +31,7 @@ public class TimeSeriesUtil {
     }
 
     public static TimeSeries random(ZonedDateTime begin, ZonedDateTime end, TemporalUnit unit) {
-        double[] data = new double[(int) unit.between(begin, end)];
+        Double[] data = new Double[(int) unit.between(begin, end)];
         data[0] = 1.0; // just for check
         for (int i = 1; i < data.length; i++) {
             data[i] = random.nextDouble();
@@ -73,7 +73,16 @@ public class TimeSeriesUtil {
     public static hu.ipsystems.timeseries.data.TimeSeries asOld(TimeSeries ts) {
         DateTimeZone dtz = DateTimeZone.forID(ts.getBegin().getZone().getId());
         DateTime dt = new DateTime(ts.getBegin().toInstant().toEpochMilli(), dtz);
-        return hu.ipsystems.timeseries.data.TimeSeries.timeSeries(dt, temporalUnitToTimePeriod(ts.getUnit()), ts.getData());
+        return hu.ipsystems.timeseries.data.TimeSeries.timeSeries(dt, temporalUnitToTimePeriod(ts.getUnit()), toPrimitive(ts.getData()));
+    }
+
+    public static double[] toPrimitive(Double[] original) {
+        double[] data = new double[original.length];
+        int i = 0;
+        for (Double d : original) {
+            data[i++] = d;
+        }
+        return data;
     }
 
     private static TimePeriod temporalUnitToTimePeriod(TemporalUnit unit) {

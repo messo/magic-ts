@@ -4,7 +4,6 @@ import hu.ipsystems.timeseries.TimeSeries;
 import hu.ipsystems.timeseries.TimeSeriesList;
 import hu.ipsystems.timeseries.util.DateUtil;
 import hu.ipsystems.timeseries.util.TimeSeriesUtil;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.ZoneId;
@@ -12,6 +11,7 @@ import java.time.temporal.ChronoUnit;
 
 import static hu.ipsystems.timeseries.util.PerfUtil.measureNewSum;
 import static hu.ipsystems.timeseries.util.PerfUtil.measureOldSum;
+import static hu.ipsystems.timeseries.util.TimeSeriesUtil.toPrimitive;
 import static org.junit.Assert.assertArrayEquals;
 
 public class HourlyPerfTests {
@@ -24,7 +24,7 @@ public class HourlyPerfTests {
                         DateUtil.zonedDateTime("2015-01-01 00:00", ZoneId.of("CET")),
                         DateUtil.zonedDateTime("2016-01-01 00:00", ZoneId.of("CET")),
                         ChronoUnit.HOURS,
-                        10_000
+                        1_000
                 )
         );
 
@@ -34,7 +34,7 @@ public class HourlyPerfTests {
         hu.ipsystems.timeseries.data.TimeSeries sum2 = measureOldSum(list);
 
         // then
-        assertArrayEquals(sum1.getData(), sum2.getData(), 1e-5);
+        assertArrayEquals(toPrimitive(sum1.getData()), sum2.getData(), 1e-5);
     }
 
     @Test
@@ -45,7 +45,7 @@ public class HourlyPerfTests {
                         DateUtil.zonedDateTime("2015-01-01 00:00", ZoneId.of("CET")),
                         DateUtil.zonedDateTime("2016-01-01 00:00", ZoneId.of("CET")),
                         ChronoUnit.HOURS,
-                        10_000
+                        1_000
                 )
         );
 
@@ -55,6 +55,6 @@ public class HourlyPerfTests {
         hu.ipsystems.timeseries.data.TimeSeries sum2 = measureOldSum(list);
 
         // then
-        assertArrayEquals(sum1.getData(), sum2.getData(), 1e-5);
+        assertArrayEquals(toPrimitive(sum1.getData()), sum2.getData(), 1e-5);
     }
 }

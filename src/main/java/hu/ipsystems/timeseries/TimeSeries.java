@@ -12,15 +12,15 @@ import static hu.ipsystems.timeseries.time.Temporals.roundUp;
 public class TimeSeries implements Iterable<Double> {
 
     // FIXME -- ???
-    static final double GAP = 0.0;
+    static final Double GAP = 0.0;
 
     private final ZonedDateTime begin;
     private final ZonedDateTime end;
     private final TemporalUnit unit;
-    private final double[] data;
+    private final Double[] data;
 
 
-    public TimeSeries(ZonedDateTime begin, TemporalUnit unit, double[] data) {
+    public TimeSeries(ZonedDateTime begin, TemporalUnit unit, Double[] data) {
         this.begin = begin;
         this.end = begin.plus(data.length, unit);
         this.unit = unit;
@@ -40,7 +40,7 @@ public class TimeSeries implements Iterable<Double> {
         return unit;
     }
 
-    public double[] getData() {
+    public Double[] getData() {
         return Arrays.copyOf(data, data.length);
     }
 
@@ -70,7 +70,7 @@ public class TimeSeries implements Iterable<Double> {
         return (int) unit.between(begin, time);
     }
 
-    private double getData(int idx) {
+    private Double getData(int idx) {
         return (idx >= 0 && idx < data.length) ? data[idx] : GAP;
     }
 

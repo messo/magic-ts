@@ -12,6 +12,7 @@ import java.util.List;
 
 import static hu.ipsystems.timeseries.util.PerfUtil.measureNewSum;
 import static hu.ipsystems.timeseries.util.PerfUtil.measureOldSum;
+import static hu.ipsystems.timeseries.util.TimeSeriesUtil.toPrimitive;
 import static org.junit.Assert.assertArrayEquals;
 
 public class MixedPerfTests {
@@ -43,6 +44,6 @@ public class MixedPerfTests {
         hu.ipsystems.timeseries.data.TimeSeries sum2 = measureOldSum(list);
 
         // then
-        assertArrayEquals(sum1.getData(), sum2.getData(), 1e-5);
+        assertArrayEquals(toPrimitive(sum1.getData()), sum2.getData(), 1e-5);
     }
 }

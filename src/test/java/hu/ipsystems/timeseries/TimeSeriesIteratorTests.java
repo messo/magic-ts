@@ -27,7 +27,7 @@ public class TimeSeriesIteratorTests {
     @Test
     public void basicHourlyIterator() {
         // given
-        double[] data = {1.0, 2.0, 3.0, 4.0, 5.0};
+        Double[] data = {1.0, 2.0, 3.0, 4.0, 5.0};
         TimeSeries timeSeries = new TimeSeries(
                 zonedDateTime("2015-01-15 10:00", CET),
                 ChronoUnit.HOURS,
@@ -38,13 +38,13 @@ public class TimeSeriesIteratorTests {
         List<Double> iteratedData = extractData(timeSeries.iterator());
 
         // then
-        Assert.assertEquals(Doubles.asList(data), iteratedData);
+        Assert.assertEquals(Arrays.asList(data), iteratedData);
     }
 
     @Test
     public void intervalHourlyIterator() {
         // given
-        double[] data = {1.0, 2.0, 3.0, 4.0, 5.0};
+        Double[] data = {1.0, 2.0, 3.0, 4.0, 5.0};
         TimeSeries timeSeries = new TimeSeries(
                 zonedDateTime("2015-01-15 10:00", CET),
                 ChronoUnit.HOURS,
@@ -62,16 +62,16 @@ public class TimeSeriesIteratorTests {
         // then
         Assert.assertEquals(24, iteratedData.size());
 
-        double[] expected = new double[24];
+        Double[] expected = new Double[24];
         Arrays.fill(expected, TimeSeries.GAP);
         System.arraycopy(data, 0, expected, 10, data.length);
-        Assert.assertEquals(Doubles.asList(expected), iteratedData);
+        Assert.assertEquals(Arrays.asList(expected), iteratedData);
     }
 
     @Test
     public void hourlyIteratorForDaily_normal() {
         // given
-        double[] data = {1.0, 2.0};
+        Double[] data = {1.0, 2.0};
         TimeSeries timeSeries = new TimeSeries(
                 zonedDateTime("2015-01-15 00:00", CET),
                 ChronoUnit.DAYS,
@@ -95,7 +95,7 @@ public class TimeSeriesIteratorTests {
     @Test
     public void hourlyIteratorForDaily_23() {
         // given
-        double[] data = {1.0};
+        Double[] data = {1.0};
         TimeSeries timeSeries = new TimeSeries(
                 zonedDateTime("2015-03-29 00:00", CET),
                 ChronoUnit.DAYS,
@@ -119,7 +119,7 @@ public class TimeSeriesIteratorTests {
     @Test
     public void hourlyIteratorForDaily_25() {
         // given
-        double[] data = {1.0};
+        Double[] data = {1.0};
         TimeSeries timeSeries = new TimeSeries(
                 zonedDateTime("2015-10-25 00:00", CET),
                 ChronoUnit.DAYS,
@@ -143,7 +143,7 @@ public class TimeSeriesIteratorTests {
     @Test
     public void dailyIteratorForMonthly() {
         // given
-        double[] data = {1.0, 2.0};
+        Double[] data = {1.0, 2.0};
         TimeSeries timeSeries = new TimeSeries(
                 zonedDateTime("2015-01-01 00:00", CET),
                 ChronoUnit.MONTHS,
@@ -173,7 +173,7 @@ public class TimeSeriesIteratorTests {
     @Test
     public void hourlyIteratorForMonthly() {
         // given
-        double[] data = {1.0, 2.0};
+        Double[] data = {1.0, 2.0};
         TimeSeries timeSeries = new TimeSeries(
                 zonedDateTime("2015-01-01 00:00", CET),
                 ChronoUnit.MONTHS,
@@ -203,7 +203,7 @@ public class TimeSeriesIteratorTests {
     @Test
     public void monthlyIteratorForYearly() {
         // given
-        double[] data = {1.0};
+        Double[] data = {1.0};
         TimeSeries timeSeries = new TimeSeries(
                 zonedDateTime("2015-01-01 00:00", CET),
                 ChronoUnit.YEARS,
@@ -227,7 +227,7 @@ public class TimeSeriesIteratorTests {
     @Test
     public void dailyIteratorForYearly() {
         // given
-        double[] data = {1.0};
+        Double[] data = {1.0};
         TimeSeries timeSeries = new TimeSeries(
                 zonedDateTime("2015-01-01 00:00", CET),
                 ChronoUnit.YEARS,
@@ -251,7 +251,7 @@ public class TimeSeriesIteratorTests {
     @Test
     public void hourlyIteratorForYearly() {
         // given
-        double[] data = {1.0};
+        Double[] data = {1.0};
         TimeSeries timeSeries = new TimeSeries(
                 zonedDateTime("2015-01-01 00:00", CET),
                 ChronoUnit.YEARS,
@@ -275,7 +275,7 @@ public class TimeSeriesIteratorTests {
     @Test
     public void dailyIteratorForHourly() {
         // given
-        double[] data = {1.0, 2.0};
+        Double[] data = {1.0, 2.0};
         TimeSeries timeSeries = new TimeSeries(
                 zonedDateTime("2015-01-15 00:00", CET),
                 ChronoUnit.HOURS,
