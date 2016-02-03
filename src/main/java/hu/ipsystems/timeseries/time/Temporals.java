@@ -3,9 +3,14 @@ package hu.ipsystems.timeseries.time;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.IsoFields;
 import java.time.temporal.TemporalUnit;
 
 public final class Temporals {
+
+    private Temporals() {
+    }
+
 
     public static ZonedDateTime roundDown(ZonedDateTime dateTime, TemporalUnit temporalUnit) {
         if (temporalUnit.getDuration().compareTo(ChronoUnit.DAYS.getDuration()) != 1) {
@@ -17,6 +22,8 @@ public final class Temporals {
                 case YEARS:
                     return dateTime.with(ChronoField.NANO_OF_DAY, 0).with(ChronoField.DAY_OF_YEAR, 1);
             }
+        } else if (temporalUnit == IsoFields.QUARTER_YEARS) {
+            return dateTime.with(ChronoField.NANO_OF_DAY, 0).with(IsoFields.DAY_OF_QUARTER, 1);
         }
 
         throw new IllegalArgumentException("Unsupported temporal unit: " + temporalUnit);

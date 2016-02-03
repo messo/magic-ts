@@ -1,12 +1,14 @@
 package hu.ipsystems.timeseries;
 
 import com.google.common.primitives.Doubles;
+import hu.ipsystems.timeseries.time.TemporalUnits;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.IsoFields;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -143,6 +145,38 @@ public class TimeSeriesIteratorTests {
     }
 
     @Test
+    public void quarterHourlyIteratorForHourly() {
+        // given
+        double[] data = {1.0, 2.0};
+        TimeSeries timeSeries = new TimeSeries(
+                zonedDateTime("2015-01-15 10:00", CET),
+                ChronoUnit.HOURS,
+                data
+        );
+
+        // when
+        List<Double> iteratedData = extractData(
+                timeSeries.iterator(
+                        zonedDateTime("2015-01-15 09:45", CET),
+                        zonedDateTime("2015-01-15 12:15", CET),
+                        TemporalUnits.QUARTER_HOURS
+                )
+        );
+
+        // then
+        Assert.assertEquals(10, iteratedData.size());
+        Assert.assertEquals(
+                generateDoubles(
+                        DoubleStream.of(TimeSeries.GAP),
+                        DoubleStream.generate(() -> 1.0).limit(4),
+                        DoubleStream.generate(() -> 2.0).limit(4),
+                        DoubleStream.of(TimeSeries.GAP)
+                ),
+                iteratedData
+        );
+    }
+
+    @Test
     public void dailyIteratorForMonthly() {
         // given
         double[] data = {1.0, 2.0};
@@ -200,6 +234,86 @@ public class TimeSeriesIteratorTests {
                 ),
                 iteratedData
         );
+    }
+
+    @Test
+    public void monthlyIteratorForQuarterYearly() {
+        // given
+        double[] data = {1.0, 2.0, 3.0, 4.0};
+        TimeSeries timeSeries = new TimeSeries(
+                zonedDateTime("2015-01-01 00:00", CET),
+                IsoFields.QUARTER_YEARS,
+                data
+        );
+
+        // when
+        List<Double> iteratedData = extractData(
+                timeSeries.iterator(
+                        zonedDateTime("2015-01-01 00:00", CET),
+                        zonedDateTime("2016-01-01 00:00", CET),
+                        ChronoUnit.MONTHS
+                )
+        );
+
+        // then
+        Assert.assertEquals(3 + 3 + 3 + 3, iteratedData.size());
+        Assert.assertEquals(
+                generateDoubles(
+                        DoubleStream.generate(() -> 1.0).limit(3),
+                        DoubleStream.generate(() -> 2.0).limit(3),
+                        DoubleStream.generate(() -> 3.0).limit(3),
+                        DoubleStream.generate(() -> 4.0).limit(3)
+                ),
+                iteratedData
+        );
+    }
+
+    @Test
+    public void dailyIteratorForQuarterYearly() {
+        // given
+        double[] data = {1.0, 2.0};
+        TimeSeries timeSeries = new TimeSeries(
+                zonedDateTime("2015-04-01 00:00", CET),
+                IsoFields.QUARTER_YEARS,
+                data
+        );
+
+        // when
+        List<Double> iteratedData = extractData(
+                timeSeries.iterator(
+                        zonedDateTime("2015-06-30 00:00", CET),
+                        zonedDateTime("2015-07-02 00:00", CET),
+                        ChronoUnit.DAYS
+                )
+        );
+
+        // then
+        Assert.assertEquals(2, iteratedData.size());
+        Assert.assertEquals(generateDoubles(DoubleStream.of(1.0, 2.0)), iteratedData);
+    }
+
+    @Test
+    public void quarterYearlyIteratorForYearly() {
+        // given
+        double[] data = {1.0};
+        TimeSeries timeSeries = new TimeSeries(
+                zonedDateTime("2015-01-01 00:00", CET),
+                ChronoUnit.YEARS,
+                data
+        );
+
+        // when
+        List<Double> iteratedData = extractData(
+                timeSeries.iterator(
+                        zonedDateTime("2015-01-01 00:00", CET),
+                        zonedDateTime("2016-01-01 00:00", CET),
+                        IsoFields.QUARTER_YEARS
+                )
+        );
+
+        // then
+        Assert.assertEquals(4, iteratedData.size());
+        Assert.assertEquals(generateDoubles(DoubleStream.generate(() -> 1.0).limit(4)), iteratedData);
     }
 
     @Test
